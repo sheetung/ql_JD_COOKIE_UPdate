@@ -2,6 +2,10 @@
 
 本项目是一个基于 Flask 的 JD_COOKIE 管理系统，支持 JD_COOKIE 的查询与更新，适合内部使用。前端页面美观，支持 Docker 部署。
 
+![](figs/1.png)
+
+![](figs/2.png)
+
 ## 功能简介
 
 - 查询 JD_COOKIE 状态（按 pt_pin 查询）
