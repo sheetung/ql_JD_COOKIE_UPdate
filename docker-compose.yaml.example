@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  jdupdate:
+    build: .
+    ports:
+      - "8088:8080"
+    # 设置环境变量
+    environment:
+      - FLASK_ENV=production
+      - QL_HOST=
+      - CLIENT_ID=
+      - CLIENT_SECRET=
+    # 可选：挂载数据卷以持久化数据（如果需要）
+    # volumes:
+    #   - ./data:/app/data
+    # 可选：设置重启策略
+    restart: unless-stopped

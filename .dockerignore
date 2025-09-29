@@ -1,0 +1,16 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+venv
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.log
+.git
+.gitignore
+Dockerfile
+.dockerignore
+README.md

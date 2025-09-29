@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JD_COOKIE 管理系统-仅供内部使用</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            /* 使用图片背景替代渐变 */
+            background-image: url('https://static.moontung.top/2025/2.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* 添加背景遮罩，增强文字可读性 */
+            position: relative;
+        }
+        
+        /* 背景遮罩层 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+        
+        /* 容器样式 - 苹果系统风格玻璃透明效果 */
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        
+        .container:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 12px 40px rgba(31, 38, 135, 0.2);
+        }
+        
+        /* 标题样式 */
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 28px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #555;
+            font-size: 20px;
+            font-weight: 500;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        /* 标签页样式 */
+        .tab {
+            display: flex;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .tab-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+        
+        .tab-btn.active {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 3px;
+            background: #667eea;
+            border-radius: 3px;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background-color: #fafafa;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background-color: white;
+            box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        /* 按钮样式 */
+        button {
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.5s ease;
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* 结果显示样式 - 苹果系统风格玻璃透明效果 */
+        .result-container {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result-success {
+            border-color: rgba(76, 175, 80, 0.5);
+            background: rgba(76, 175, 80, 0.1);
+        }
+        
+        .result-error {
+            border-color: rgba(244, 67, 54, 0.5);
+            background: rgba(244, 67, 54, 0.1);
+        }
+        
+        .result-info {
+            border-color: rgba(33, 150, 243, 0.5);
+            background: rgba(33, 150, 243, 0.1);
+        }
+        
+        .result-message {
+            font-size: 14px;
+            line-height: 1.6;
+            text-align: center;
+        }
+        
+        /* 查询结果样式 - 苹果系统风格玻璃透明效果 */
+        .query-result-container {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+        
+        .query-result-header {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .query-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        
+        .query-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .query-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .query-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #667eea;
+            margin-bottom: 4px;
+        }
+        
+        .query-value {
+            font-size: 14px;
+            color: #333;
+            word-break: break-all;
+        }
+        
+        /* 状态标签样式 */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        .status-inactive {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        /* 加载动画 */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                align-items: flex-start;
+            }
+            
+            .container {
+                margin: 20px 0;
+                padding: 20px;
+            }
+            
+            h2 {
+                font-size: 24px;
+            }
+            
+            h3 {
+                font-size: 18px;
+            }
+            
+            .tab-btn {
+                font-size: 14px;
+                padding: 12px 8px;
+            }
+            
+            button {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+        }
+        
+        /* 使用帮助按钮样式 */
+        .help-btn {
+            position: relative;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 12px 24px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 120px;
+        }
+        
+        .help-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .help-btn::before {
+            content: "💡";
+            margin-right: 8px;
+            font-size: 18px;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            overflow: auto;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal-content {
+            position: relative;
+            background: rgba(24, 24, 24, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 90%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: modalFadeIn 0.5s ease;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: #e0e0e0;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: #fff;
+        }
+        
+        .help-image-container {
+            max-width: 100%;
+            max-height: 70vh;
+            overflow: auto;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0;
+        }
+        
+        .help-image {
+            max-width: 100%;
+            max-height: 70vh;
+            width: auto;
+            height: auto;
+            border-radius: 8px;
+            object-fit: contain;
+            display: block;
+        }
+        
+        .modal-title {
+            color: #e0e0e0;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>JD_COOKIE 管理系统</h2>
+
+    <div class="tab">
+        <button class="tab-btn active" onclick="openTab(event, 'updateTab')">更新</button>
+        <button class="tab-btn" onclick="openTab(event, 'queryTab')">查询</button>
+    </div>
+
+    <div id="updateTab" class="tab-content active">
+        <h3>JD_COOKIE 更新</h3>
+        
+        <div class="form-group">
+            <label for="value">完整 JD_COOKIE 值 (包含pt_key和pt_pin):</label>
+            <textarea id="value" rows="4" placeholder="请输入完整的 JD_COOKIE 值，例如: pt_key=xxx;pt_pin=yyy;"></textarea>
+        </div>
+
+        <button id="updateBtn" onclick="updateCookie()">更新并启用</button>
+        <div id="result" class="result-container"></div>
+    </div>
+
+    <div id="queryTab" class="tab-content">
+        <h3>JD_COOKIE 查询</h3>
+        
+        <div class="form-group">
+            <label for="ptpin">pt_pin 值:</label>
+            <input type="text" id="ptpin" placeholder="请输入 pt_pin 值，例如: 京东用户名123">
+        </div>
+
+        <button id="queryBtn" onclick="queryCookie()">查询</button>
+        <div id="queryResult"></div>
+    </div>
+
+    <!-- 使用帮助按钮 -->
+    <button class="help-btn" id="helpBtn">JD_COOKIE获取方法</button>
+</div>
+
+<!-- 使用帮助模态框 -->
+<div id="helpModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3 class="modal-title">使用帮助</h3>
+        <div class="help-image-container">
+            <!-- 图片链接将在JavaScript中设置 -->
+            <img class="help-image" id="helpImage" alt="https://static.moontung.top/2025/2.png">
+        </div>
+    </div>
+</div>
+
+<script>
+    const updateBtn = document.getElementById("updateBtn");
+    const result = document.getElementById("result");
+    const queryBtn = document.getElementById("queryBtn");
+    const queryResult = document.getElementById("queryResult");
+    const valueInput = document.getElementById("value");
+    const ptpinInput = document.getElementById("ptpin");
+
+    // 初始化结果区域
+    result.style.display = 'none';
+
+    // 标签页切换功能
+    function openTab(evt, tabName) {
+        // 隐藏所有内容
+        const tabContents = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabContents.length; i++) {
+            tabContents[i].classList.remove("active");
+        }
+
+        // 移除所有按钮的活动状态
+        const tabBtns = document.getElementsByClassName("tab-btn");
+        for (let i = 0; i < tabBtns.length; i++) {
+            tabBtns[i].classList.remove("active");
+        }
+
+        // 显示当前标签并激活按钮
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+
+        // 重置结果区域
+        if (tabName === 'updateTab') {
+            result.style.display = 'none';
+        } else {
+            queryResult.innerHTML = '';
+        }
+    }
+
+    // 输入框验证和格式化
+    valueInput.addEventListener('input', function() {
+        // 可以在这里添加实时格式化或验证逻辑
+        this.value = this.value.trim();
+    });
+
+    ptpinInput.addEventListener('input', function() {
+        this.value = this.value.trim();
+    });
+
+    // 更新Cookie功能
+    async function updateCookie() {
+        const value = valueInput.value.trim();
+        
+        // 清空之前的结果
+        result.innerHTML = '';
+        result.classList.remove('result-success', 'result-error', 'result-info');
+        result.style.display = 'none';
+        
+        // 输入验证
+        if (!value) {
+            showResult('error', 'JD_COOKIE 不能为空');
+            return;
+        }
+        
+        if (!value.includes('pt_key=') || !value.includes('pt_pin=')) {
+            showResult('error', 'JD_COOKIE 格式不正确，缺少必要的 pt_key 或 pt_pin 参数');
+            return;
+        }
+
+        // 显示加载状态
+        updateBtn.disabled = true;
+        showResult('info', '<div class="loading-spinner"></div> 正在提交请求...');
+
+        try {
+            const res = await fetch("/api/jdcookie/update", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ value })
+            });
+            
+            const data = await res.json();
+            
+            if (data.code === 200) {
+                showResult('success', data.message);
+                // 成功后可以清空输入框
+                valueInput.value = '';
+            } else {
+                showResult('error', data.message);
+            }
+        } catch(err) {
+            showResult('error', `请求异常: ${err.message || '未知错误'}`);
+        } finally {
+            updateBtn.disabled = false;
+        }
+    }
+
+    // 查询Cookie功能
+    async function queryCookie() {
+        const ptpin = ptpinInput.value.trim();
+        
+        // 清空之前的结果
+        queryResult.innerHTML = '';
+        
+        // 输入验证
+        if (!ptpin) {
+            queryResult.innerHTML = `
+                <div class="result-container result-error">
+                    <div class="result-message">pt_pin 不能为空</div>
+                </div>
+            `;
+            return;
+        }
+
+        // 显示加载状态
+        queryBtn.disabled = true;
+        queryResult.innerHTML = `
+            <div class="result-container result-info">
+                <div class="result-message"><div class="loading-spinner"></div> 正在查询...</div>
+            </div>
+        `;
+
+        try {
+            const res = await fetch(`/api/jdcookie/query?ptpin=${encodeURIComponent(ptpin)}`);
+            const data = await res.json();
+            
+            if (data.code === 200) {
+                // 格式化显示查询结果
+                const envInfo = data.data;
+                let statusText = envInfo.status === 0 
+                    ? '<span class="status-badge status-active">已启用</span>' 
+                    : '<span class="status-badge status-inactive">已禁用</span>';
+                
+                queryResult.innerHTML = `
+                    <div class="query-result-container">
+                        <div class="query-result-header">查询结果</div>
+                        <div class="query-item">
+                            <span class="query-label">名称</span>
+                            <span class="query-value">${escapeHTML(envInfo.name)}</span>
+                        </div>
+                        <div class="query-item">
+                            <span class="query-label">状态</span>
+                            <span class="query-value">${statusText}</span>
+                        </div>
+                        <div class="query-item">
+                            <span class="query-label">备注</span>
+                            <span class="query-value">${escapeHTML(envInfo.remarks || '无')}</span>
+                        </div>
+                        <div class="query-item">
+                            <span class="query-label">更新时间</span>
+                            <span class="query-value">${formatDate(envInfo.updatedAt) || '未知'}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                queryResult.innerHTML = `
+                    <div class="result-container result-error">
+                        <div class="result-message">${escapeHTML(data.message)}</div>
+                    </div>
+                `;
+            }
+        } catch(err) {
+            queryResult.innerHTML = `
+                <div class="result-container result-error">
+                    <div class="result-message">请求异常: ${escapeHTML(err.message || '未知错误')}</div>
+                </div>
+            `;
+        } finally {
+            queryBtn.disabled = false;
+        }
+    }
+
+    // 显示结果的辅助函数
+    function showResult(type, message) {
+        result.style.display = 'block';
+        result.classList.remove('result-success', 'result-error', 'result-info');
+        
+        switch(type) {
+            case 'success':
+                result.classList.add('result-success');
+                break;
+            case 'error':
+                result.classList.add('result-error');
+                break;
+            case 'info':
+                result.classList.add('result-info');
+                break;
+        }
+        
+        result.innerHTML = `<div class="result-message">${message}</div>`;
+    }
+
+    // 格式化日期的辅助函数
+    function formatDate(dateString) {
+        if (!dateString) return null;
+        
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        } catch (e) {
+            return dateString;
+        }
+    }
+
+    // HTML转义的辅助函数，防止XSS攻击
+    function escapeHTML(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // 使用帮助模态框功能
+    const helpBtn = document.getElementById("helpBtn");
+    const helpModal = document.getElementById("helpModal");
+    const helpImage = document.getElementById("helpImage");
+    const closeBtn = document.getElementsByClassName("close")[0];
+
+    // 设置帮助图片链接（用户后续可以提供实际链接）
+    const helpImageUrl = "https://static.moontung.top/2025/jdcookie.png"; // 占位符链接
+    helpImage.src = helpImageUrl;
+    helpImage.alt = "JD_COOKIE管理系统使用帮助";
+
+    // 打开模态框
+    helpBtn.onclick = function() {
+        helpModal.style.display = "block";
+    }
+
+    // 关闭模态框
+    closeBtn.onclick = function() {
+        helpModal.style.display = "none";
+    }
+
+    // 点击模态框外部关闭
+    window.onclick = function(event) {
+        if (event.target === helpModal) {
+            helpModal.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>
