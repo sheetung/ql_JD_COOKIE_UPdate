@@ -9,8 +9,10 @@ app = Flask(__name__, static_folder="static", template_folder="static")
 # 用于存储IP访问次数的字典
 # 格式: { 'ip_address': {'count': number, 'last_reset': timestamp} }
 ip_access_count = {}
-# 每天最大访问次数
-MAX_DAILY_ACCESS = 7
+# 每天最大访问次数（可通过环境变量配置）
+MAX_DAILY_ACCESS = int(os.environ.get('MAX_DAILY_ACCESS', '7'))
+# 背景图URL（可通过环境变量配置）
+BACKGROUND_IMAGE_URL = os.environ.get('BACKGROUND_IMAGE_URL', 'https://t.alcy.cc/ycy')
 
 
 def limit_ip_access(func):
@@ -114,6 +116,16 @@ def index():
 # @app.route("/jdupdate")
 # def jdupdate_page():
 #     return render_template("jdupdate.html")
+
+@app.route("/api/config", methods=["GET"])
+def get_config():
+    """返回前端配置信息"""
+    return jsonify({
+        "code": 200,
+        "data": {
+            "backgroundImageUrl": BACKGROUND_IMAGE_URL
+        }
+    })
 
 @app.route("/api/envs", methods=["GET"])
 def get_envs():

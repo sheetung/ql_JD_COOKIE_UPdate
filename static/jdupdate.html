@@ -14,8 +14,7 @@
         
         body {
             font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            /* 使用图片背景替代渐变 */
-            background-image: url('https://t.alcy.cc/ycy');
+            /* 使用图片背景替代渐变 - 背景图将通过JavaScript动态设置 */
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -361,28 +360,48 @@
                 padding: 10px;
                 align-items: flex-start;
             }
-            
+
             .container {
                 margin: 20px 0;
                 padding: 20px;
             }
-            
+
             h2 {
                 font-size: 24px;
             }
-            
+
             h3 {
                 font-size: 18px;
             }
-            
+
             .tab-btn {
                 font-size: 14px;
                 padding: 12px 8px;
             }
-            
+
             button {
                 padding: 12px 16px;
                 font-size: 14px;
+            }
+        }
+
+        /* 版权信息样式 */
+        .copyright {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 500;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .copyright {
+                font-size: 12px;
+                margin-top: 20px;
+                padding-top: 15px;
             }
         }
         
@@ -536,6 +555,11 @@
 
     <!-- 使用帮助按钮 -->
     <button class="help-btn" id="helpBtn">JD_COOKIE获取方法</button>
+
+    <!-- 版权信息 -->
+    <div class="copyright">
+        &copy; 2025 sheetung. All rights reserved.
+    </div>
 </div>
 
 <!-- 使用帮助模态框 -->
@@ -551,6 +575,24 @@
 </div>
 
 <script>
+    // 页面加载时获取配置信息
+    async function loadConfig() {
+        try {
+            const res = await fetch("/api/config");
+            const data = await res.json();
+            if (data.code === 200 && data.data.backgroundImageUrl) {
+                document.body.style.backgroundImage = `url('${data.data.backgroundImageUrl}')`;
+            }
+        } catch (err) {
+            console.error('加载配置失败:', err);
+            // 使用默认背景图
+            document.body.style.backgroundImage = "url('https://t.alcy.cc/ycy')";
+        }
+    }
+
+    // 立即执行配置加载
+    loadConfig();
+
     const updateBtn = document.getElementById("updateBtn");
     const result = document.getElementById("result");
     const queryBtn = document.getElementById("queryBtn");

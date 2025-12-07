@@ -37,49 +37,95 @@
     ```sh
     pip install -r requirements.txt
     ```
-2. 复制配置文件
 
-```bash
-cp docker-compose.yaml.example docker-compose.yaml
-```
+2. 设置环境变量
 
-3. 设置环境变量
+    ```sh
+    export QL_HOST=http://your-qinglong-host:5789
+    export CLIENT_ID=your_client_id
+    export CLIENT_SECRET=your_client_secret
 
-    - QL_HOST
-    - CLIENT_ID
-    - CLIENT_SECRET
+    # 可选配置
+    export MAX_DAILY_ACCESS=7
+    export BACKGROUND_IMAGE_URL=https://t.alcy.cc/ycy
+    ```
+
+3. 运行应用
+
+    ```sh
+    python app.py
+    ```
+
+### 2. Docker Compose 部署（推荐）
+
+1. 复制并修改配置文件
+
+    ```sh
+    cp docker-compose.yaml.example docker-compose.yaml
+    ```
+
+2. 编辑 `docker-compose.yaml`，填入你的青龙面板配置信息
 
 
-### 2. Docker 部署
-
-1. 构建镜像
+3. 构建镜像
 
     ```sh
     docker build -t jdupdate .
     ```
 
-2. 运行容器
+4. 启动服务
 
-使用 `docker-compose.yaml`：
+    ```sh
+    docker-compose up -d
+    ```
 
-```sh
-docker-compose up -d
-```
+4. 查看日志
 
-### 3. 环境变量说明
+    ```sh
+    docker-compose logs -f
+    ```
 
-- `QL_HOST`：青龙面板地址（如 http://192.168.192.37:5789）
+## 环境变量说明
+
+### 必需环境变量
+- `QL_HOST`：青龙面板地址（如 `http://192.168.192.37:5789`）
 - `CLIENT_ID`：青龙开放 API 的 Client ID
 - `CLIENT_SECRET`：青龙开放 API 的 Client Secret
 
+### 可选环境变量
+- `MAX_DAILY_ACCESS`：每个 IP 每日最大访问次数（默认值：`7`）
+- `BACKGROUND_IMAGE_URL`：页面背景图片 URL（默认值：`https://t.alcy.cc/ycy`）
+  - 可以使用任何图片 URL
+  - 推荐使用随机图片 API 或自定义图片链接
+
 ## 前端页面
 
-访问 `/` 即可使用管理界面，支持 JD_COOKIE 查询与更新。
+访问 `http://localhost:8080` 即可使用管理界面，支持 JD_COOKIE 查询与更新。
+
+## 功能特性
+
+### IP 访问限制
+- 默认每个 IP 每日最多可访问 7 次（可通过 `MAX_DAILY_ACCESS` 环境变量修改）
+- 访问计数自动在每日重置
+- 超过限制后会显示剩余重置时间
+
+### 自定义背景
+- 支持通过 `BACKGROUND_IMAGE_URL` 环境变量自定义页面背景图
+- 默认使用随机图片 API
+- 可以使用任何公开的图片 URL
+
+### API 接口
+- `GET /api/config` - 获取前端配置信息
+- `GET /api/envs` - 获取青龙面板环境变量列表
+- `GET /api/jdcookie/query?ptpin=<value>` - 查询指定 pt_pin 的 JD_COOKIE
+- `POST /api/jdcookie/update` - 更新并启用 JD_COOKIE
 
 ## 注意事项
 
-- 本项目仅供内部学习与交流使用，请勿用于非法用途。
-- 默认限制同一 IP 每日最多 7 次操作，可在 `app.py` 中修改 `MAX_DAILY_ACCESS`。
+- 本项目仅供内部学习与交流使用，请勿用于非法用途
+- IP 访问限制基于内存存储，应用重启后计数会重置
+- 默认限制同一 IP 每日最多 7 次操作，可通过环境变量修改
+- 建议在生产环境中使用 HTTPS 协议确保数据传输安全
 
 ## 问题反馈及功能开发
 
